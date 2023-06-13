@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shopping_app/widgets/products_grid.dart';
-import '../widgets/product_item.dart';
-import '../models/products.dart';
+import '../widgets/products_grid.dart';
 
 class ProductOverviewScreen extends StatelessWidget {
   const ProductOverviewScreen({super.key});
@@ -12,7 +10,7 @@ class ProductOverviewScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Shop'),
       ),
-      body: ProductsGrid(),
+      body: const ProductsGrid(),
     );
   }
 }
