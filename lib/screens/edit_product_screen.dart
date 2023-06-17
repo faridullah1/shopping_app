@@ -17,6 +17,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
   final _descriptionFocusNode = FocusNode();
   final _imageUrlController = TextEditingController();
   final _form = GlobalKey<FormState>();
+  var _init = false;
   var _editedProduct = Product(
     id: '',
     title: '',
@@ -24,6 +25,12 @@ class _EditProductScreenState extends State<EditProductScreen> {
     price: 0,
     imageUrl: '',
   );
+
+  var _initValues = {
+    'title': '',
+    'description': '',
+    'price': 0,
+  };
 
   @override
   void dispose() {
@@ -33,12 +40,38 @@ class _EditProductScreenState extends State<EditProductScreen> {
     super.dispose();
   }
 
+  @override
+  void didChangeDependencies() {
+    if (!_init) {
+      final productId = ModalRoute.of(context)!.settings.arguments as String;
+      if (productId != '') {
+        _editedProduct = Provider.of<Products>(context).findById(productId);
+        _initValues = {
+          'title': _editedProduct.title,
+          'description': _editedProduct.description,
+          'price': _editedProduct.price.toString(),
+        };
+        _imageUrlController.text = _editedProduct.imageUrl;
+      }
+    }
+
+    _init = false;
+    super.didChangeDependencies();
+  }
+
   void _saveForm() {
     final isValid = _form.currentState!.validate();
     if (!isValid) return;
 
     _form.currentState!.save();
-    Provider.of<Products>(context, listen: false).addProduct(_editedProduct);
+
+    if (_editedProduct.id != '') {
+      Provider.of<Products>(context, listen: false)
+          .updateProduct(_editedProduct.id, _editedProduct);
+    } else {
+      Provider.of<Products>(context, listen: false).addProduct(_editedProduct);
+    }
+
     Navigator.of(context).pop();
   }
 
@@ -63,6 +96,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
               TextFormField(
                 decoration: const InputDecoration(labelText: 'Title'),
                 textInputAction: TextInputAction.next,
+                initialValue: _initValues['title'] as String,
                 onFieldSubmitted: (_) {
                   FocusScope.of(context).requestFocus(_priceFocusNode);
                 },
@@ -79,12 +113,14 @@ class _EditProductScreenState extends State<EditProductScreen> {
                     description: _editedProduct.description,
                     price: _editedProduct.price,
                     imageUrl: _editedProduct.imageUrl,
+                    isFavourite: _editedProduct.isFavourite,
                   );
                 },
               ),
               TextFormField(
                 decoration: const InputDecoration(labelText: 'Price'),
                 textInputAction: TextInputAction.next,
+                initialValue: _initValues['price'] as String,
                 keyboardType: TextInputType.number,
                 focusNode: _priceFocusNode,
                 onFieldSubmitted: (_) {
@@ -110,6 +146,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                     description: _editedProduct.description,
                     price: double.parse(newValue as String),
                     imageUrl: _editedProduct.imageUrl,
+                    isFavourite: _editedProduct.isFavourite,
                   );
                 },
               ),
@@ -118,6 +155,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                 maxLines: 3,
                 focusNode: _descriptionFocusNode,
                 keyboardType: TextInputType.multiline,
+                initialValue: _initValues['description'] as String,
                 validator: (value) {
                   if (value!.isEmpty) {
                     return 'Description is required.';
@@ -135,6 +173,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                     description: newValue as String,
                     price: _editedProduct.price,
                     imageUrl: _editedProduct.imageUrl,
+                    isFavourite: _editedProduct.isFavourite,
                   );
                 },
               ),
@@ -187,6 +226,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                           description: _editedProduct.description,
                           price: _editedProduct.price,
                           imageUrl: newValue as String,
+                          isFavourite: _editedProduct.isFavourite,
                         );
                       },
                     ),
