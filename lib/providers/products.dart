@@ -52,35 +52,33 @@ class Products with ChangeNotifier {
     return _items.firstWhere((product) => product.id == id);
   }
 
-  Future<void> addProduct(Product product) {
+  Future<void> addProduct(Product product) async {
     var url = Uri.parse(
         'https://flutter-shopping-app-9dd6d-default-rtdb.firebaseio.com/products.json');
 
-    return http
-        .post(url,
-            body: jsonEncode(<String, dynamic>{
-              'title': product.title,
-              'description': product.description,
-              'price': product.price,
-              'imageUrl': product.imageUrl,
-              'isFavourite': product.isFavourite
-            }))
-        .then(
-      (resp) {
-        final newProduct = Product(
-          id: jsonDecode(resp.body)['name'],
-          title: product.title,
-          description: product.description,
-          price: product.price,
-          imageUrl: product.imageUrl,
-        );
-        _items.add(newProduct);
-        notifyListeners();
-      },
-    ).catchError((error) {
-      print('An error occured:' + error);
+    try {
+      final resp = await http.post(url,
+          body: jsonEncode(<String, dynamic>{
+            'title': product.title,
+            'description': product.description,
+            'price': product.price,
+            'imageUrl': product.imageUrl,
+            'isFavourite': product.isFavourite
+          }));
+
+      final newProduct = Product(
+        id: jsonDecode(resp.body)['name'],
+        title: product.title,
+        description: product.description,
+        price: product.price,
+        imageUrl: product.imageUrl,
+      );
+      _items.add(newProduct);
+      notifyListeners();
+    } catch (error) {
+      print('An error occured:' + error.toString());
       throw error;
-    });
+    }
   }
 
   void updateProduct(String id, Product newProduct) {
