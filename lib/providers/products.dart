@@ -91,8 +91,19 @@ class Products with ChangeNotifier {
     }
   }
 
-  void deleteProduct(String id) {
-    _items.removeWhere((product) => product.id == id);
+  Future<void> deleteProduct(String id) async {
+    final url = Uri.parse('${AppConstants.baseUrl}/products/$id.json');
+    final existingProductIndex =
+        _items.indexWhere((product) => product.id == id);
+    var existingProduct = _items[existingProductIndex];
+    _items.removeAt(existingProductIndex);
     notifyListeners();
+
+    final resp = await http.delete(url);
+    if (resp.statusCode >= 400) {
+      _items.insert(existingProductIndex, existingProduct);
+      notifyListeners();
+      throw const HttpException('Product not found');
+    }
   }
 }
