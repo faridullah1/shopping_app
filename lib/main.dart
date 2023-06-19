@@ -43,7 +43,7 @@ class MyApp extends StatelessWidget {
           UserProductsScreen.routeName: (ctx) => const UserProductsScreen(),
           EditProductScreen.routeName: (ctx) => const EditProductScreen(),
         },
-        debugShowCheckedModeBanner: false,
+        debugShowCheckedModeBanner: true,
       ),
     );
   }

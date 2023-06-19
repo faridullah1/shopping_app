@@ -40,6 +40,7 @@ class Products with ChangeNotifier {
       _items = loadedProducts;
       notifyListeners();
     } catch (error) {
+      print('Error:' + error.toString());
       throw (error);
     }
   }
@@ -72,9 +73,19 @@ class Products with ChangeNotifier {
     }
   }
 
-  void updateProduct(String id, Product newProduct) {
+  Future<void> updateProduct(String id, Product newProduct) async {
     final productIndex = _items.indexWhere((prod) => prod.id == id);
     if (productIndex >= 0) {
+      var url = Uri.parse('${AppConstants.baseUrl}/products/$id.json');
+
+      await http.patch(url,
+          body: jsonEncode({
+            'title': newProduct.title,
+            'description': newProduct.description,
+            'price': newProduct.price,
+            'imageUrl': newProduct.imageUrl,
+          }));
+
       _items[productIndex] = newProduct;
       notifyListeners();
     }
