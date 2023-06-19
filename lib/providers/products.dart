@@ -2,43 +2,11 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import '../constants/app_constants.dart';
 import './product.dart';
 
 class Products with ChangeNotifier {
-  final List<Product> _items = [
-    Product(
-      id: 'p1',
-      title: 'Red Shirt',
-      description: 'A red shirt - it is pretty red!',
-      price: 29.99,
-      imageUrl:
-          'https://cdn.pixabay.com/photo/2016/10/02/22/17/red-t-shirt-1710578_1280.jpg',
-    ),
-    Product(
-      id: 'p2',
-      title: 'Camera',
-      description: 'A nice black camera.',
-      price: 59.99,
-      imageUrl:
-          'https://images.pexels.com/photos/90946/pexels-photo-90946.jpeg?cs=srgb&dl=pexels-math-90946.jpg&fm=jpg',
-    ),
-    Product(
-      id: 'p3',
-      title: 'Yellow Scarf',
-      description: 'Warm and cozy - exactly what you need for the winter.',
-      price: 19.99,
-      imageUrl:
-          'https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg',
-    ),
-    Product(
-      id: 'p4',
-      title: 'Headphone',
-      description: 'Headphone to buy.',
-      price: 49.99,
-      imageUrl:
-          'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8cHJvZHVjdHxlbnwwfHwwfHx8MA%3D%3D&w=1000&q=80',
-    ),
-  ];
+  List<Product> _items = [];
 
   List<Product> get items {
     return [..._items];
@@ -52,9 +20,32 @@ class Products with ChangeNotifier {
     return _items.firstWhere((product) => product.id == id);
   }
 
+  Future<void> fetchAndSetProducts() async {
+    var url = Uri.parse('${AppConstants.baseUrl}/products.json');
+    try {
+      final resp = await http.get(url);
+      final extractedData = jsonDecode(resp.body) as Map<String, dynamic>;
+      final List<Product> loadedProducts = [];
+      extractedData.forEach((prodId, prodData) {
+        loadedProducts.add(Product(
+          id: prodId,
+          title: prodData['title'],
+          description: prodData['description'],
+          price: prodData['price'],
+          imageUrl: prodData['imageUrl'],
+          isFavourite: prodData['isFavourite'],
+        ));
+      });
+
+      _items = loadedProducts;
+      notifyListeners();
+    } catch (error) {
+      throw (error);
+    }
+  }
+
   Future<void> addProduct(Product product) async {
-    var url = Uri.parse(
-        'https://flutter-shopping-app-9dd6d-default-rtdb.firebaseio.com/products.json');
+    var url = Uri.parse('${AppConstants.baseUrl}/products.json');
 
     try {
       final resp = await http.post(url,

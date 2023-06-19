@@ -35,14 +35,6 @@ class _EditProductScreenState extends State<EditProductScreen> {
   };
 
   @override
-  void dispose() {
-    _priceFocusNode.dispose();
-    _descriptionFocusNode.dispose();
-    _imageUrlController.dispose();
-    super.dispose();
-  }
-
-  @override
   void didChangeDependencies() {
     if (!_init) {
       final productId = ModalRoute.of(context)!.settings.arguments;
@@ -61,6 +53,14 @@ class _EditProductScreenState extends State<EditProductScreen> {
 
     _init = false;
     super.didChangeDependencies();
+  }
+
+  @override
+  void dispose() {
+    _priceFocusNode.dispose();
+    _descriptionFocusNode.dispose();
+    _imageUrlController.dispose();
+    super.dispose();
   }
 
   void _saveForm() async {
